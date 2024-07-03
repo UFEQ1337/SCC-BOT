@@ -34,7 +34,7 @@
     ],
     "win": {
       "target": "portable",
-      "icon": "web/img/icon-512.ico",
+      "icon": "web/img/icon.ico",
       "legalTrademarks": "Mateusz Popielarz™",
       "publisherName": "Mateusz Popielarz"
     },
@@ -49,7 +49,7 @@
           ]
         }
       ],
-      "icon": "web/img/icon.ico"
+      "icon": "web/img/icon-512.ico"
     }
   }
 }
