@@ -21,6 +21,9 @@ jobs:
         with:
           node-version: '20'  # Aktualizacja do Node.js 20
 
+      - name: Check out repository structure
+        run: ls -la  # Dodaj ten krok, aby sprawdzić strukturę katalogów
+
       - name: Install dependencies
         run: npm install
 
