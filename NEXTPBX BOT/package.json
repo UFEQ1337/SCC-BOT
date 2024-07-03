@@ -6,7 +6,8 @@
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",
-    "build-mac": "electron-builder --mac"
+    "build-mac": "electron-builder --mac",
+    "test": "echo \"No tests specified\" && exit 0"  // Dodano placeholder dla skryptu testowego
   },
   "keywords": [],
   "author": "Mateusz Popielarz",
@@ -48,7 +49,7 @@
           ]
         }
       ],
-      "icon": "web/img/icon-512.ico"
+      "icon": "web/img/icon.ico"
     }
   }
 }
