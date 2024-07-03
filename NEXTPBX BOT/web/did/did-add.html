@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        connect-src 'self' https://*.scc24.pl:*;
+        script-src 'self';
+        object-src 'none';
+    ">
+    <link rel="stylesheet" href="../css/style.css">
+    <title>SCC</title>
+</head>
+<body>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Postęp dodawania DID</h2>
+            <div id="myProgressBar">
+                <div id="myProgress">0%</div>
+            </div>
+            <div id="progressText"></div>
+            <button id="modalOkBtn">OK</button>
+        </div>
+    </div>    
+<div class="container">
+    <div class="logo"></div>
+    <h1>Wybierz plik z danymi</h1>
+    <div id="fileUploadContainer">
+        <label for="fileInput" class="fileInputLabel">Wybierz plik</label>
+        <input type="file" id="fileInput" accept=".xlsx, .xls" hidden />
+        <button id="loadButton" type="button">Wczytaj</button>
+        <div id="excelData"></div>        
+        <button id="submitButton" type="button" hidden>Wykonaj</button>
+    </div>
+</div>
+    <script src="../js/did-add.js" type="module"></script>
+</body>
+</html>

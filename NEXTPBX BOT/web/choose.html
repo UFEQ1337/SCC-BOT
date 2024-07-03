@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    connect-src 'self' https://*.scc24.pl:*;
+    script-src 'self';
+    object-src 'none';
+  ">  
+  <link rel="stylesheet" href="css/style.css">
+  <title>SCC - BOT</title>
+</head>
+<body>
+<div class="container">
+    <div class="logo"></div>
+    <h1>Wybierz opcje konfiguracji</h1>
+    <div id="buttonMenu">
+        <button id="didButton">DID</button>
+        <!-- <button id="etxButton">ETX</button> -->
+        <button id="queueButton">QUEUE</button>
+        <button id="customButton">CUSTOM DESTINATION</button>
+    </div>
+</div>
+    <script src="js/choose.js"></script>
+</body>
+</html>

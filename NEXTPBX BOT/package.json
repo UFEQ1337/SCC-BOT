@@ -1,0 +1,53 @@
+{
+  "name": "SCC-BOT",
+  "version": "1.0.2",
+  "description": "Automatyczny BOT NEXTPBX pozwalający na edycję danych centrali.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "keywords": [],
+  "author": "Mateusz Popielarz",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^30.1.2",
+    "electron-builder": "^24.13.3",
+    "electron-builder-squirrel-windows": "^24.13.3"
+  },
+  "dependencies": {
+    "xlsx": "^0.18.5"
+  },
+  "build": {
+    "appId": "pl.Popielarz.SCC",
+    "productName": "SCC BOT",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "package.json",
+      "web/**/*",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "web/img/icon.ico",
+      "legalTrademarks": "Mateusz Popielarz™",
+      "publisherName": "Mateusz Popielarz"
+    },
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": [
+        {
+          "target": "dir",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "web/img/icon.ico"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    connect-src 'self' https://*.scc24.pl:*;
+    script-src 'self';
+    object-src 'none';
+  ">  
+  <link rel="stylesheet" href="css/style.css">
+  <title>SCC - BOT - DID</title>
+</head>
+<body>
+<div class="container">
+    <div class="logo"></div>
+    <h1>Wybierz co chcesz zrobić z DID</h1>
+    <div id="actionMenu">
+        <button class="actionButton" data-action="add">Dodaj</button>
+        <button class="actionButton" data-action="update">Aktualizuj</button>
+        <button class="actionButton" data-action="download">Pobierz</button>
+        <!-- <button class="actionButton" data-action="delete">Usuń</button> -->
+    </div> 
+</div>
+    <script src="js/did.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    connect-src 'self' https://*.scc24.pl:*;
+    script-src 'self';
+    object-src 'none';
+  ">
+    <link rel="stylesheet" href="../css/style.css">
+    <title>SCC - BOT - QUEUE</title>
+</head>
+<body>
+<div class="container">
+    <div class="logo"></div>
+    <h1>Wybierz co chcesz pobrać z QUEUE</h1>
+    <div id="actionMenu">
+        <button class="actionButton" data-action="download-users">Użytkownicy</button>
+<!--        <button class="actionButton" data-action="download-download-settings">Ustawienia kolejek</button>-->
+    </div>
+</div>
+<script src="../js/queue-choose.js"></script>
+</body>
+</html>
