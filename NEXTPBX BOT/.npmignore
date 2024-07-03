@@ -1,0 +1,9 @@
+# Wykluczanie niepotrzebnych plików i katalogów
+node_modules/
+src/**/*.test.js
+src/**/*.spec.js
+build/
+dist/
+logs/
+*.log
+.idea/

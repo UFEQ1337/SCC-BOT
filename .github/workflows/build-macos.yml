@@ -32,6 +32,10 @@ jobs:
         run: npm run build-mac
         working-directory: 'NEXTPBX BOT'
 
+      - name: Clean unnecessary files
+        run: rm -rf 'NEXTPBX BOT/dist/mac/node_modules'
+        working-directory: 'NEXTPBX BOT'
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
