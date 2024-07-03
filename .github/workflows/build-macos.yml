@@ -1,4 +1,4 @@
-name: Build macOS
+name: Build on macOS
 
 on:
   push:
@@ -13,22 +13,19 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3  # Zaktualizowana wersja
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
+      - name: Set up Node.js
+        uses: actions/setup-node@v3  # Zaktualizowana wersja
+        with:
+          node-version: '20'  # Aktualizacja do Node.js 20
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Build the Electron app
-      run: npm run build
+      - name: Build the project
+        run: npm run build-mac  # Upewnij się, że masz odpowiedni skrypt w package.json
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: electron-app
-        path: dist/
+      - name: Run tests
+        run: npm test
