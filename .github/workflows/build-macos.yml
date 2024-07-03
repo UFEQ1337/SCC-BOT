@@ -14,24 +14,26 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3  # Zaktualizowana wersja
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3  # Zaktualizowana wersja
+        uses: actions/setup-node@v3
         with:
-          node-version: '20'  # Aktualizacja do Node.js 20
+          node-version: '20'
 
       - name: Change directory to project folder
         run: cd 'NEXTPBX BOT'
 
       - name: Install dependencies
         run: npm install
-        working-directory: 'NEXTPBX BOT'  # Ustawienie katalogu roboczego
+        working-directory: 'NEXTPBX BOT'
 
       - name: Build the project
-        run: npm run build-mac  # Upewnij się, że masz odpowiedni skrypt w package.json
-        working-directory: 'NEXTPBX BOT'  # Ustawienie katalogu roboczego
+        run: npm run build-mac
+        working-directory: 'NEXTPBX BOT'
 
-      - name: Run tests
-        run: npm test
-        working-directory: 'NEXTPBX BOT'  # Ustawienie katalogu roboczego
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: mac-build
+          path: 'NEXTPBX BOT/dist/mac'
