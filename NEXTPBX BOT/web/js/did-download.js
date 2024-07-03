@@ -116,6 +116,7 @@ async function fetchIVRs(websiteUrl, apiKey, selectedTenantName) {
 async function fetchMediaFiles(websiteUrl, apiKey, selectedTenantName) {
     const url = `${websiteUrl}/pbx/proxyapi.php?key=${apiKey}&reqtype=MANAGEDB&object=MEDIAFILE&action=LIST&tenant=${selectedTenantName}`;
     return await fetchData(url)
+
 }
 
 async function fetchDestinationData(websiteUrl, apiKey, tenantName, typeIdSrc) {
@@ -159,10 +160,14 @@ function reverseCalculateDestinations(
                     : `QUEUE-${type_id_dst}`;
                 break;
             case 'CUSTOM':
-                readableValue = `CUSTOM-${type_id_dst}`;
+                readableValue = customizations[type_id_dst]
+                    ? `CUSTOM-${customizations[type_id_dst].cu_name}`
+                    : `CUSTOM-${type_id_dst}`;
                 break;
             case 'CONDITION':
-                readableValue = `CONDITION-${type_id_dst}`;
+                readableValue = conditions[type_id_dst]
+                    ? `CONDITION-${conditions[type_id_dst].co_name}`
+                    : `CONDITION-${type_id_dst}`;
                 break;
             case 'IVR':
                 readableValue = ivrs[type_id_dst]
@@ -171,7 +176,7 @@ function reverseCalculateDestinations(
                 break;
             case 'PLAYBACK':
                 readableValue = mediaFiles[type_id_dst]
-                    ? `PLAYBACK-${mediaFiles[type_id_dst].mf_name}`
+                    ? `PLAYBACK-${mediaFiles[type_id_dst].me_name}`
                     : `PLAYBACK-${type_id_dst}`;
                 break;
             default:
@@ -184,20 +189,25 @@ function reverseCalculateDestinations(
     return readableDestinations;
 }
 
+
 function flattenDestinations(didDetails) {
     const flatData = didDetails.map(did => {
         const destinations = did.destinations;
+        console.log('Processing DID:', did.di_number, 'with destinations:', destinations);
+
         const flattened = {
             DID: did.di_number,
             KOMENTARZ: did.di_comment,
-            NAGRANIA: did.di_recording || '',
-            DESTINATION1: destinations[1] || '',
-            DESTINATION2: destinations[2] || '',
-            DESTINATION3: destinations[3] || '',
-            DESTINATION4: destinations[4] || '',
-            DESTINATION5: destinations[5] || ''
+            NAGRANIA: did.di_recording || ''
         };
 
+        // Przypisujemy destynacje w odwrotnej kolejności do zawsze 5 pól
+        const destinationKeys = Object.keys(destinations).sort((a, b) => b - a);
+        for (let i = 0; i < 5; i++) {
+            flattened[`DESTINATION${i + 1}`] = destinations[destinationKeys[i]] || '';
+        }
+
+        console.log('Flattened data:', flattened);
         return flattened;
     });
 

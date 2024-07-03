@@ -422,13 +422,13 @@ function calculateDestinations(
     for (let i = 1; i <= 5; i++) {
         const destinationKey = `DESTINATION${i}`;
         const destinationValue = branch[destinationKey];
-        if (!destinationValue)
-            continue;
+        if (!destinationValue) continue;
 
         const [type, key] = destinationValue
             .split('-')
             .map(part => part.trim());
         let destinationEntry = null;
+
         switch (type) {
             case 'PLAYBACK':
                 destinationEntry = findEntry(type, key, mediaFiles, 'me_id', 'me_name');
@@ -450,14 +450,10 @@ function calculateDestinations(
                     : null;
                 break;
             case 'CUSTOM':
-                destinationEntry = customizations[key]
-                    ? `CUSTOM-${customizations[key].cu_id}`
-                    : null;
+                destinationEntry = findEntry(type, key, customizations, 'cu_id', 'cu_name');
                 break;
             case 'CONDITION':
-                destinationEntry = conditions[key]
-                    ? `CONDITION-${conditions[key].co_id}`
-                    : null;
+                destinationEntry = findEntry(type, key, conditions, 'co_id', 'co_name');
                 break;
             default:
                 destinationEntry = destinationValue;

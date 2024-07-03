@@ -37,7 +37,7 @@ function updateProgress(progress) {
     elem.textContent = progress + '%';
 }
 
-function showFinalMessage({addedCount, updatedCount, skippedCount, skippedDIDs, duration}) {
+function showFinalMessage({ addedCount, updatedCount, skippedCount, skippedDIDs, duration }) {
     const modalText = document.getElementById("progressText");
     let message = `Dodano DID-ów: ${addedCount}<br>`;
     message += `Zaktualizowano DID-ów: ${updatedCount}<br>`;
@@ -57,9 +57,7 @@ function handleFileSelection(event) {
     const fileInput = event.target;
     const fileInputLabel = document.querySelector('.fileInputLabel');
     fileInputLabel.textContent = fileInput.files.length > 0
-        ? fileInput
-            .files[0]
-            .name
+        ? fileInput.files[0].name
         : 'Wybierz plik';
 }
 
@@ -77,12 +75,10 @@ function loadFile() {
     reader.onload = function (e) {
         try {
             const data = new Uint8Array(e.target.result);
-            const workbook = xlsx.read(data, {type: 'array'});
+            const workbook = xlsx.read(data, { type: 'array' });
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
-            json = xlsx
-                .utils
-                .sheet_to_json(worksheet, {defval: ""});
+            json = xlsx.utils.sheet_to_json(worksheet, { defval: "" });
 
             const didValues = json.map(row => row.DID);
             const duplicates = didValues.filter(
@@ -137,7 +133,6 @@ function initializeEventListeners() {
 
     fileInput.addEventListener('change', handleFileSelection);
     loadButton.addEventListener('click', loadFile);
-
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -167,18 +162,12 @@ async function fetchQueues(websiteUrl, apiKey, selectedTenantName) {
     }
     const text = await response.text();
     const queues = {};
-    text
-        .split('|')
-        .forEach(queue => {
-            const [id, ...nameParts] = queue.split(':');
-            if (id && nameParts.length) {
-                queues[
-                    nameParts
-                        .join(':')
-                        .trim()
-                    ] = id.trim();
-            }
-        });
+    text.split('|').forEach(queue => {
+        const [id, ...nameParts] = queue.split(':');
+        if (id && nameParts.length) {
+            queues[nameParts.join(':').trim()] = id.trim();
+        }
+    });
     return queues;
 }
 
@@ -231,6 +220,8 @@ async function addDestinations(
         jsondata: JSON.stringify(destinations)
     }).toString();
 
+    console.log(`Dodawanie destynacji dla DID ${didId}:`, destinations); // Dodane logowanie
+
     await fetchData(addDestinationUrl, {
         method: 'POST',
         headers: {
@@ -252,23 +243,17 @@ function calculateDestinations(
     const destinations = {};
 
     const findEntry = (type, key, collection, idField, nameField) => {
-        const entry = Object
-            .values(collection)
-            .find(item => item[nameField] === key);
-        return entry
-            ? `${type}-${entry[idField]}`
-            : null;
+        if (!key) return ''; // Zwraca pustą wartość, jeśli key jest pusty
+        const entry = Object.values(collection).find(item => item[nameField] === key);
+        return entry ? `${type}-${entry[idField]}` : null;
     };
 
     for (let i = 1; i <= 5; i++) {
         const destinationKey = `DESTINATION${i}`;
         const destinationValue = branch[destinationKey];
-        if (!destinationValue)
-            continue;
+        if (destinationValue === undefined) continue;
 
-        const [type, key] = destinationValue
-            .split('-')
-            .map(part => part.trim());
+        const [type, key] = destinationValue.split('-').map(part => part.trim());
         let destinationEntry = null;
         switch (type) {
             case 'PLAYBACK':
@@ -278,41 +263,31 @@ function calculateDestinations(
                 destinationEntry = findEntry(type, key, ivrs, 'iv_id', 'iv_name');
                 break;
             case 'EXT':
-                const foundExtension = Object
-                    .values(extensions)
-                    .find(ext => ext.ex_name === key || ext.ex_number === key);
-                destinationEntry = foundExtension
-                    ? `EXT-${foundExtension.ex_id}`
-                    : null;
+                const foundExtension = Object.values(extensions).find(ext => ext.ex_name === key || ext.ex_number === key);
+                destinationEntry = foundExtension ? `EXT-${foundExtension.ex_id}` : null;
                 break;
             case 'QUEUE':
-                destinationEntry = queues[key]
-                    ? `QUEUE-${queues[key]}`
-                    : null;
+                destinationEntry = queues[key] ? `QUEUE-${queues[key]}` : null;
                 break;
             case 'CUSTOM':
-                destinationEntry = customizations[key]
-                    ? `CUSTOM-${customizations[key].cu_id}`
-                    : null;
+                destinationEntry = findEntry(type, key, customizations, 'cu_id', 'cu_name');
                 break;
             case 'CONDITION':
-                destinationEntry = conditions[key]
-                    ? `CONDITION-${conditions[key].co_id}`
-                    : null;
+                destinationEntry = findEntry(type, key, conditions, 'co_id', 'co_name');
                 break;
             default:
-                destinationEntry = destinationValue;
+                destinationEntry = destinationValue || ''; // Zwraca pustą wartość, jeśli destinationValue jest pusty
         }
 
-        if (!destinationEntry) {
+        if (destinationEntry === null) {
             console.error(`Nie znaleziono ${type.toLowerCase()} dla ${destinationValue}`);
-            return null; // Return null to indicate invalid destination
+            destinationEntry = ''; // Przypisuje pustą wartość, jeśli nie znaleziono odpowiedniego wpisu
         }
 
         destinations[i] = destinationEntry;
     }
 
-    return Object.keys(destinations).length > 0 ? destinations : null;
+    return destinations;
 }
 
 function parseSQLFeedback(feedbackString) {
@@ -321,10 +296,9 @@ function parseSQLFeedback(feedbackString) {
 
     if (match) {
         const diId = match[1];
-
         return { operation: "update", diId };
     } else {
-        console.error("Unrecognized format:", feedbackString);
+        console.error("Nierozpoznany format:", feedbackString);
         return null;
     }
 }
@@ -342,6 +316,8 @@ async function addOrUpdateDID(
     selectedTenantName,
     existingDIDs
 ) {
+    console.log(`Przetwarzanie DID: ${branch.DID}`, branch); // Dodane logowanie
+
     const destinations = calculateDestinations(
         branch,
         extensions,
@@ -351,13 +327,6 @@ async function addOrUpdateDID(
         ivrs,
         mediaFiles
     );
-
-    if (!destinations) {
-        console.error(`Nie znaleziono odpowiednich destinations dla DID: ${branch.DID}`);
-        throw new Error(
-            `Nie znaleziono odpowiednich destinations dla DID: ${branch.DID}`
-        );
-    }
 
     let apiUrl = `${websiteUrl}/pbx/proxyapi.php`;
     let actionParams;
@@ -375,12 +344,8 @@ async function addOrUpdateDID(
             object: 'DID',
             action: 'UPDATE',
             tenant: selectedTenantName,
-            objectid: didRecord
-                .di_id
-                .toString(),
-            jsondata: JSON.stringify(
-                { di_comment: branch.KOMENTARZ, di_recording: branch.NAGRANIA }
-            )
+            objectid: didRecord.di_id.toString(),
+            jsondata: JSON.stringify({ di_comment: branch.KOMENTARZ, di_recording: branch.NAGRANIA })
         });
     } else {
         actionPerformed = 'add';
@@ -390,9 +355,7 @@ async function addOrUpdateDID(
             object: 'DID',
             action: 'ADD',
             tenant: selectedTenantName,
-            jsondata: JSON.stringify(
-                { di_number: branch.DID, di_comment: branch.KOMENTARZ, di_recording: branch.NAGRANIA }
-            )
+            jsondata: JSON.stringify({ di_number: branch.DID, di_comment: branch.KOMENTARZ, di_recording: branch.NAGRANIA })
         });
     }
 
@@ -407,6 +370,8 @@ async function addOrUpdateDID(
             body: bodyParams
         });
 
+        console.log(`Odpowiedź serwera dla DID ${branch.DID}:`, rawResponse); // Dodane logowanie
+
         let didId = null;
         if (rawResponse && typeof rawResponse === 'object' && rawResponse.di_id) {
             didId = rawResponse.di_id;
@@ -417,14 +382,8 @@ async function addOrUpdateDID(
             }
         }
 
-        if (didId && Object.keys(destinations).length > 0) {
-            await addDestinations(
-                didId,
-                destinations,
-                websiteUrl,
-                apiKey,
-                selectedTenantName
-            );
+        if (didId !== null) {
+            await addDestinations(didId, destinations, websiteUrl, apiKey, selectedTenantName);
         }
 
         return {
@@ -455,9 +414,7 @@ async function main() {
             ]
         );
 
-        const existingDIDs = Object
-            .values(didData)
-            .map(item => ({ di_number: item.di_number, di_id: item.di_id }));
+        const existingDIDs = Object.values(didData).map(item => ({ di_number: item.di_number, di_id: item.di_id }));
 
         const didsToProcess = json;
         const skippedDIDs = [];
@@ -507,13 +464,8 @@ async function main() {
             duration
         });
 
-        document
-            .getElementById("modalOkBtn")
-            .onclick = function () {
-            document
-                .getElementById("myModal")
-                .style
-                .display = "none";
+        document.getElementById("modalOkBtn").onclick = function () {
+            document.getElementById("myModal").style.display = "none";
             window.location.href = '../choose.html';
         };
     } catch (error) {
