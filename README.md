@@ -10,7 +10,7 @@ Aby zainstalować NEXTPBX BOT, wykonaj poniższe kroki:
 
 2. **Klonowanie repozytorium**: Użyj poniższego polecenia, aby sklonować repozytorium na swój lokalny komputer:
    ```
-   git clone https://github.com/UFEQ1337/NEXTPBX-BOT.git
+   git clone https://github.com/UFEQ1337/SCC-BOT.git
    ```
 
 3. **Instalacja zależności**: Przejdź do katalogu projektu i zainstaluj wymagane zależności za pomocą npm (Node Package Manager):
