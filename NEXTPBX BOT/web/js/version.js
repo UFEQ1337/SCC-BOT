@@ -1,18 +1,35 @@
 async function fetchVersion() {
+    let response;
     try {
-        const response = await fetch('../package.json');
-        const data = await response.json();
-        return data.version;
+        // Najpierw spróbuj pobrać z ../package.json
+        response = await fetch('../package.json');
+        if (!response.ok) {
+            throw new Error('Response not ok');
+        }
     } catch (error) {
-        console.error('Error fetching version:', error);
-        return 'unknown';
+        // Pomiń błąd, tylko ostrzeżenie w konsoli
+        console.warn('Failed to fetch from ../package.json');
+        try {
+            // Jeśli nie uda się, spróbuj z ../../package.json
+            response = await fetch('../../package.json');
+            if (!response.ok) {
+                throw new Error('Response not ok');
+            }
+        } catch (error) {
+            // Pomiń błąd, tylko ostrzeżenie w konsoli
+            console.warn('Failed to fetch from ../../package.json');
+            return 'błąd';
+        }
     }
+
+    const data = await response.json();
+    return data.version;
 }
 
 async function displayVersion() {
     const version = await fetchVersion();
     const versionElement = document.createElement('div');
-    versionElement.textContent = `Wersja: ${version}`;
+    versionElement.textContent = `Wersja: ${version}`; // Zmieniono na polski
     versionElement.style.position = 'fixed';
     versionElement.style.bottom = '10px';
     versionElement.style.right = '10px';
