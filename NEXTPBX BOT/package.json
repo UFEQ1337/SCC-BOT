@@ -1,7 +1,7 @@
 {
   "name": "SCC-BOT",
-  "version": "1.0.3",
-  "description": "Automatyczny BOT NEXTPBX pozwalający na edycję danych centrali.",
+  "version": "1.0.4",
+  "description": "Bot do automatyzacji centrali",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -16,9 +16,6 @@
     "electron": "^31.2.0",
     "electron-builder": "^24.13.3",
     "electron-builder-squirrel-windows": "^24.13.3"
-  },
-  "dependencies": {
-    "xlsx": "^0.18.5"
   },
   "build": {
     "appId": "pl.Popielarz.SCC",
@@ -51,5 +48,8 @@
       ],
       "icon": "web/img/icon-512.ico"
     }
+  },
+  "dependencies": {
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
   }
 }
