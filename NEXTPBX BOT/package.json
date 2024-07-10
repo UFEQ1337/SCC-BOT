@@ -1,6 +1,6 @@
 {
   "name": "SCC-BOT",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Automatyczny BOT NEXTPBX pozwalający na edycję danych centrali.",
   "main": "main.js",
   "scripts": {

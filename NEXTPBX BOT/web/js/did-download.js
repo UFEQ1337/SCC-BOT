@@ -180,7 +180,7 @@ function reverseCalculateDestinations(
                     : `PLAYBACK-${type_id_dst}`;
                 break;
             default:
-                readableValue = `UNKNOWN-${type_id_dst}`;
+                readableValue = ``;
                 break;
         }
         readableDestinations[de_ord] = readableValue;
