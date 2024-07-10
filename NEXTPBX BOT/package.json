@@ -13,7 +13,7 @@
   "author": "Mateusz Popielarz",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^30.1.2",
+    "electron": "^31.2.0",
     "electron-builder": "^24.13.3",
     "electron-builder-squirrel-windows": "^24.13.3"
   },
