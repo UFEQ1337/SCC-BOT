@@ -156,18 +156,27 @@ async function fetchData(url, options) {
 
 async function fetchQueues(websiteUrl, apiKey, selectedTenantName) {
     const url = `${websiteUrl}/pbx/proxyapi.php?key=${apiKey}&reqtype=INFO&info=queues&tenant=${selectedTenantName}`;
+    console.log(`Fetching queues from URL: ${url}`);
+
     const response = await fetch(url);
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
+
     const text = await response.text();
+    console.log(`Raw response text: ${text}`);
+
     const queues = {};
     text.split('|').forEach(queue => {
         const [id, ...nameParts] = queue.split(':');
         if (id && nameParts.length) {
-            queues[nameParts.join(':').trim()] = id.trim();
+            const queueName = nameParts.join(':').trim();
+            queues[queueName] = id.trim();
+            console.log(`Processed queue - ID: ${id.trim()}, Name: ${queueName}`);
         }
     });
+
+    console.log('Final queues object:', queues);
     return queues;
 }
 
@@ -220,7 +229,7 @@ async function addDestinations(
         jsondata: JSON.stringify(destinations)
     }).toString();
 
-    console.log(`Dodawanie destynacji dla DID ${didId}:`, destinations); // Dodane logowanie
+    console.log(`Dodawanie destynacji dla DID ${didId}:`, destinations);
 
     await fetchData(addDestinationUrl, {
         method: 'POST',
@@ -243,18 +252,22 @@ function calculateDestinations(
     const destinations = {};
 
     const findEntry = (type, key, collection, idField, nameField) => {
-        if (!key) return ''; // Zwraca pustą wartość, jeśli key jest pusty
-        const entry = Object.values(collection).find(item => item[nameField] === key);
+        if (!key) return '';
+        const entry = Object.values(collection).find(item => item[nameField].trim() === key.trim());
         return entry ? `${type}-${entry[idField]}` : null;
     };
 
     for (let i = 1; i <= 5; i++) {
         const destinationKey = `DESTINATION${i}`;
         const destinationValue = branch[destinationKey];
-        if (destinationValue === undefined) continue;
+        if (!destinationValue) continue;
 
-        const [type, key] = destinationValue.split('-').map(part => part.trim());
+        const [type, ...keyParts] = destinationValue.split('-').map(part => part.trim());
+        const key = keyParts.join('-');
         let destinationEntry = null;
+
+        console.log(`Processing destination - Type: ${type}, Key: ${key}`);
+
         switch (type) {
             case 'PLAYBACK':
                 destinationEntry = findEntry(type, key, mediaFiles, 'me_id', 'me_name');
@@ -263,11 +276,15 @@ function calculateDestinations(
                 destinationEntry = findEntry(type, key, ivrs, 'iv_id', 'iv_name');
                 break;
             case 'EXT':
-                const foundExtension = Object.values(extensions).find(ext => ext.ex_name === key || ext.ex_number === key);
+                const foundExtension = Object.values(extensions).find(ext => ext.ex_name.trim() === key.trim() || ext.ex_number.trim() === key.trim());
                 destinationEntry = foundExtension ? `EXT-${foundExtension.ex_id}` : null;
                 break;
             case 'QUEUE':
-                destinationEntry = queues[key] ? `QUEUE-${queues[key]}` : null;
+                if (queues.hasOwnProperty(key)) {
+                    destinationEntry = `QUEUE-${queues[key]}`;
+                } else {
+                    console.error(`Nie znaleziono kolejki dla: ${key}`);
+                }
                 break;
             case 'CUSTOM':
                 destinationEntry = findEntry(type, key, customizations, 'cu_id', 'cu_name');
@@ -276,12 +293,13 @@ function calculateDestinations(
                 destinationEntry = findEntry(type, key, conditions, 'co_id', 'co_name');
                 break;
             default:
-                destinationEntry = destinationValue || ''; // Zwraca pustą wartość, jeśli destinationValue jest pusty
+                destinationEntry = destinationValue || '';
         }
 
-        if (destinationEntry === null) {
+        if (!destinationEntry) {
             console.error(`Nie znaleziono ${type.toLowerCase()} dla ${destinationValue}`);
-            destinationEntry = ''; // Przypisuje pustą wartość, jeśli nie znaleziono odpowiedniego wpisu
+        } else {
+            console.log(`Found destination entry: ${destinationEntry}`);
         }
 
         destinations[i] = destinationEntry;
@@ -316,7 +334,7 @@ async function addOrUpdateDID(
     selectedTenantName,
     existingDIDs
 ) {
-    console.log(`Przetwarzanie DID: ${branch.DID}`, branch); // Dodane logowanie
+    console.log(`Przetwarzanie DID: ${branch.DID}`, branch);
 
     const destinations = calculateDestinations(
         branch,
@@ -370,7 +388,7 @@ async function addOrUpdateDID(
             body: bodyParams
         });
 
-        console.log(`Odpowiedź serwera dla DID ${branch.DID}:`, rawResponse); // Dodane logowanie
+        console.log(`Odpowiedź serwera dla DID ${branch.DID}:`, rawResponse);
 
         let didId = null;
         if (rawResponse && typeof rawResponse === 'object' && rawResponse.di_id) {

@@ -317,24 +317,27 @@ async function fetchData(url, options = {}) {
 
 async function fetchQueues(websiteUrl, apiKey, selectedTenantName) {
     const url = `${websiteUrl}/pbx/proxyapi.php?key=${apiKey}&reqtype=INFO&info=queues&tenant=${selectedTenantName}`;
+    console.log(`Fetching queues from URL: ${url}`);
+
     const response = await fetch(url);
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
+
     const text = await response.text();
+    console.log(`Raw response text: ${text}`);
+
     const queues = {};
-    text
-        .split('|')
-        .forEach(queue => {
-            const [id, ...nameParts] = queue.split(':');
-            if (id && nameParts.length) {
-                queues[
-                    nameParts
-                        .join(':')
-                        .trim()
-                    ] = id.trim();
-            }
-        });
+    text.split('|').forEach(queue => {
+        const [id, ...nameParts] = queue.split(':');
+        if (id && nameParts.length) {
+            const queueName = nameParts.join(':').trim();
+            queues[queueName] = id.trim();
+            console.log(`Processed queue - ID: ${id.trim()}, Name: ${queueName}`);
+        }
+    });
+
+    console.log('Final queues object:', queues);
     return queues;
 }
 
@@ -411,12 +414,8 @@ function calculateDestinations(
     const destinations = {};
 
     const findEntry = (type, key, collection, idField, nameField) => {
-        const entry = Object
-            .values(collection)
-            .find(item => item[nameField] === key);
-        return entry
-            ? `${type}-${entry[idField]}`
-            : null;
+        const entry = Object.values(collection).find(item => item[nameField].trim() === key.trim());
+        return entry ? `${type}-${entry[idField]}` : null;
     };
 
     for (let i = 1; i <= 5; i++) {
@@ -424,10 +423,11 @@ function calculateDestinations(
         const destinationValue = branch[destinationKey];
         if (!destinationValue) continue;
 
-        const [type, key] = destinationValue
-            .split('-')
-            .map(part => part.trim());
+        const [type, ...keyParts] = destinationValue.split('-').map(part => part.trim());
+        const key = keyParts.join('-');
         let destinationEntry = null;
+
+        console.log(`Processing destination - Type: ${type}, Key: ${key}`);
 
         switch (type) {
             case 'PLAYBACK':
@@ -437,17 +437,15 @@ function calculateDestinations(
                 destinationEntry = findEntry(type, key, ivrs, 'iv_id', 'iv_name');
                 break;
             case 'EXT':
-                const foundExtension = Object
-                    .values(extensions)
-                    .find(ext => ext.ex_name === key || ext.ex_number === key);
-                destinationEntry = foundExtension
-                    ? `EXT-${foundExtension.ex_id}`
-                    : null;
+                const foundExtension = Object.values(extensions).find(ext => ext.ex_name.trim() === key.trim() || ext.ex_number.trim() === key.trim());
+                destinationEntry = foundExtension ? `EXT-${foundExtension.ex_id}` : null;
                 break;
             case 'QUEUE':
-                destinationEntry = queues[key]
-                    ? `QUEUE-${queues[key]}`
-                    : null;
+                if (queues.hasOwnProperty(key)) {
+                    destinationEntry = `QUEUE-${queues[key]}`;
+                } else {
+                    console.error(`Nie znaleziono kolejki dla: ${key}`);
+                }
                 break;
             case 'CUSTOM':
                 destinationEntry = findEntry(type, key, customizations, 'cu_id', 'cu_name');
@@ -461,6 +459,8 @@ function calculateDestinations(
 
         if (!destinationEntry) {
             console.error(`Nie znaleziono ${type.toLowerCase()} dla ${destinationValue}`);
+        } else {
+            console.log(`Found destination entry: ${destinationEntry}`);
         }
 
         destinations[i] = destinationEntry;
@@ -468,3 +468,4 @@ function calculateDestinations(
 
     return destinations;
 }
+
